@@ -7,56 +7,62 @@ import glob
 import cPickle
 import csv
 from pylab import *
-
-csv_file = open('ff1010bird_metadata.csv','rb')
-label_csv = csv.reader(csv_file)
-data_list = vstack(list(label_csv))
-names_wav = data_list[1:,0]
-labels    = data_list[1:,1]
-names_wav = names_wav[int(sys.argv[1]):int(sys.argv[2])]
-labels    = labels[int(sys.argv[1]):int(sys.argv[2])]
+from sklearn.decomposition import PCA
 
 
 
-window_size = 2**16
+window_size = 2**14
 J1,Q1= 5 ,8
 J2,Q2 = 4,1
 family_names = ['Morlet','Paul','Gammatone']
 family_params = [6,2,[6.,.5]]
 
 
-print ' GENERATE FILTER BANK'
-filter_bank1,filters_1_fft = get_filter_banks(window_size,J1,Q1,family_names,family_params)
-filter_bank2,filters_2_fft = get_filter_banks(window_size,J2,Q2,family_names,family_params)
-print 'GET CROISE SCATTERING COEFFS'
-for i in xrange((len(names_wav))):
-	print 'FILE NB: ' + str(i)+ ' OUT OF: ' +str(len(names_wav))
-	L2,L4,S1,S2,V1,V2,RISK_1,RISK_2,FAMILY_1,FAMILY_2 =[], [],[],[], [],[],[],[],[],[]
-	data_files = sort(glob.glob('../Scattering-MFCWT/wav/'+names_wav[i]+'.wav'))
-        Fs,x = read(data_files)
-	cpt = 0
-	for w in xrange(0,len(x)-window_size,window_size-20000):
-		t = time.time()	
-		x_window = x[w:w+window_size].astype('float32')
+
+
+#f=sort(glob.glob('../Scattering-MFCWT/wav/'+names_wav[i]+'.wav'))
+#_,signal = read(data_files)
+
+
+def transform(x,window_size,family_names,family_params,J1,Q1,J2,Q2):
+	c = PCA(1)
+	#GENERATE FILTER BANK
+	filter_bank1,filters_1_fft = get_filter_banks(window_size,J1,Q1,family_names,family_params)
+	filter_bank2,filters_2_fft = get_filter_banks(window_size,J2,Q2,family_names,family_params)
+	#INIT LISTS
+	L1,L2,S1,S2,V,P =[],[],[],[],[],[]
+	start_indices = xrange(0,len(x)-window_size,window_size/2)
+	print "NUMBER OF WINDOWS",len(start_indices)
+	for w in start_indices:
+		print w
+		x_window = x[w:w+window_size].astype('float32')*hanning(window_size)
 		x_window /= norm(x_window)
-		S1_w,S2_w,L2_w,L4_w =  scattering_3d(x_window,family_names,filter_bank1,filter_bank2)
-		print time.time()-t
-		S1.append(S1_w)
-                S2.append(S2_w)
-		#L2.append(L2_w)
-		#L4.append(L4_w)
-		print 'WINDOW:  '+str(cpt) + '   DATA FILE   '+names_wav[i] + '  LABEL  '+ labels[i]
-		cpt +=1
-	features = [S1,S2,int(labels[i])]
-	f = open('./SCATTERING-FEATURES-NEW/scat_features_'+names_wav[i]+'_label_'+labels[i]+'.pkl','wb')
-	cPickle.dump(features,f)
-	print './scattering_features_'+names_wav[i]
-	f.close()
+		s1,s2,l1,l2 =  scattering_3d(x_window,family_names,filter_bank1,filter_bank2)	
+		L1 = asarray(l1)
+		L2 = asarray(l2)
+		S1.append(s1)
+                S2.append(s2)
+		VV = []
+		PP = []
+		for kk in xrange(L1.shape[0]):#accross families
+			print kk
+			v_local = []
+			p_local = []
+			for ii in xrange(J2*Q2):
+				p_local.append(c.fit_transform(L2[-1][kk,ii*J1*Q1:(ii+1)*J1*Q1,:].T).mean())
+				v_local.append(c.explained_variance_[0])
+			VV.append(asarray(v_local))
+			PP.append(asarray(p_local))
+		V.append(VV)
+		P.append(PP)
+	S1=asarray(S1)
+	S2=asarray(S2)
+	L1=asarray(L1)
+	L2=asarray(L2)
+	V=asarray(V)
+	P=asarray(P)
+	print shape(S1),shape(V)
+	return S1,S2,L1,L2,V,P
 
-
-
-
-
-
-
+data = transform(randn(2**17),window_size,family_names,family_params,J1,Q1,J2,Q2)
 

@@ -117,26 +117,28 @@ def get_scatt(sparse_input,N):
         scalo = abs(create_representation(sparse_input,N))
         for i in xrange(N_IN):
                 output[i]      = sparse_vector(fft(scalo[i])[:N/2],[0,N/2])
-	return output,scalo.sum(1)
+	return output,scalo.sum(1),scalo
 
 def scattering_3d(x,family_names,filter_bank1,filter_bank2):
-	L2           = []
-	L4           = []
+	LL2           = []
+	L2 = []
+	LL4           = []
+	L4 = []
         first        = [sparse_vector(fft(x)[:len(x)/2],[0,len(x)/2])]
 	S1,V1        = [],[]
 	S2,V2        = [],[]
 	## LAYER 1 FOR ALL FAMILIES
 	for i in xrange(len(family_names)):
 	        L1          = apply_filter_bank(first,filter_bank1[i])
-		l2,s1       = get_scatt(L1,len(x))
-		L2.append(l2)
+		l2,s1,l2full    = get_scatt(L1,len(x))
+		LL2.append(l2)
+		L2.append(l2full)
 		S1.append(s1)
 	for i in xrange(len(family_names)):
-		for j in xrange(len(family_names)):
-			L3 = apply_filter_bank(L2[i],filter_bank2[j])
-			l4,s2 = get_scatt(L3,len(x))
-			L4.append(l4)
-		        S2.append(s2)
+		L3 = apply_filter_bank(LL2[i],filter_bank2[i])
+		_,s2,L1 = get_scatt(L3,len(x))
+		L4.append(L1)
+	        S2.append(s2)
 	return S1,S2,L2,L4
 	
 	
