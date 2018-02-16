@@ -13,15 +13,14 @@ from sklearn.decomposition import PCA
 
 window_size = 2**14
 J1,Q1= 5 ,8
-J2,Q2 = 4,1
+J2,Q2 = 6,2
 family_names = ['Morlet','Paul','Gammatone']
 family_params = [6,2,[6.,.5]]
 
 
 
-
-#f=sort(glob.glob('../Scattering-MFCWT/wav/'+names_wav[i]+'.wav'))
-#_,signal = read(data_files)
+f=sort(glob.glob('./*.wav'))
+_,signal = read(f[0])
 
 
 def transform(x,window_size,family_names,family_params,J1,Q1,J2,Q2):
@@ -36,19 +35,20 @@ def transform(x,window_size,family_names,family_params,J1,Q1,J2,Q2):
 	for w in start_indices:
 		print w
 		x_window = x[w:w+window_size].astype('float32')*hanning(window_size)
-		x_window /= norm(x_window)
+#		x_window /= norm(x_window)
 		s1,s2,l1,l2 =  scattering_3d(x_window,family_names,filter_bank1,filter_bank2)	
-		L1 = asarray(l1)
-		L2 = asarray(l2)
+		L1.append(asarray(l1))
+		L2.append(asarray(l2))
 		S1.append(s1)
                 S2.append(s2)
 		VV = []
 		PP = []
-		for kk in xrange(L1.shape[0]):#accross families
+		for kk in xrange(L1[-1].shape[0]):#accross families
 			print kk
 			v_local = []
 			p_local = []
 			for ii in xrange(J2*Q2):
+				print ii
 				p_local.append(c.fit_transform(L2[-1][kk,ii*J1*Q1:(ii+1)*J1*Q1,:].T).mean())
 				v_local.append(c.explained_variance_[0])
 			VV.append(asarray(v_local))
@@ -61,8 +61,18 @@ def transform(x,window_size,family_names,family_params,J1,Q1,J2,Q2):
 	L2=asarray(L2)
 	V=asarray(V)
 	P=asarray(P)
-	print shape(S1),shape(V)
+	print shape(S1),shape(S2),shape(L1),shape(L2),shape(V),shape(P)
 	return S1,S2,L1,L2,V,P
 
-data = transform(randn(2**17),window_size,family_names,family_params,J1,Q1,J2,Q2)
 
+sig = signal[:100000]
+data = transform(sig,2**12,[family_names[2]],[family_params[2]],J1,Q1,J2,Q2)
+subplot(411)
+plot(sig)
+subplot(412)
+imshow(data[-1][:,0,:].T,aspect='auto')
+subplot(413)
+imshow(data[-2][:,0,:].T,aspect='auto')
+subplot(414)
+imshow(data[0][:,0,:].T,aspect='auto')
+show()
