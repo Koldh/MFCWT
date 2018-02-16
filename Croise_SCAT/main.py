@@ -12,9 +12,13 @@ from sklearn.decomposition import PCA
 
 
 window_size = 2**14
-J1,Q1= 8 ,16
-J2,Q2 = 8,6
+#representation scales
+J1,Q1= 8 ,6
+J2,Q2 = 8,4
+
+#Wavelet Family
 family_names = ['Morlet','Paul','Gammatone']
+#Wavelet Family parameter
 family_params = [15,8,[6.,.5]]
 
 
@@ -60,19 +64,20 @@ def transform(x,window_size,family_names,family_params,J1,Q1,J2,Q2):
 	L2=asarray(L2)
 	V=asarray(V)
 	P=asarray(P)
-	print shape(S1),shape(S2),shape(L1),shape(L2),shape(V),shape(P)
-	return S1,S2,l1,l2,V,P
+	# S1 are first order scattering coefficients
+	# S2 are second order scatt. coeffs
+	return transpose(S1,[1,2,0]),transpose(S2,[1,2,0]),transpose(P,[1,2,0])
 
 
 sig = signal[:2**16]
-data = transform(sig,2**11,[family_names[1]],[family_params[1]],J1,Q1,J2,Q2)
-subplot(411)
+data = transform(sig,2**11,family_names,family_params,J1,Q1,J2,Q2)
+subplot(311)
 plot(sig)
 xlim([0,len(sig)])
-subplot(412)
-imshow(data[-1][:,0,:].T,aspect='auto')
-subplot(413)
-imshow(data[-2][:,0,:].T,aspect='auto')
-subplot(414)
-imshow(data[2][0],aspect='auto')
+subplot(312)
+imshow(data[-1][0],aspect='auto')
+title('P')
+subplot(313)
+imshow(data[-3][0],aspect='auto')
+title('S1')
 show()

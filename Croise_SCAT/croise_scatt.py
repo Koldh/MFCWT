@@ -35,18 +35,18 @@ def create_filters(N,J,Q,eps=0.001,wavelet_name='Morlet',wavelet_params=60):
   	        filters                 = fftshift(filters,axes=1)
 		mus                     = zeros_like(lambda_)
 		sigmas                  = zeros_like(lambda_)
-  	        for i in xrange(shape(filters)[0]):
+  #	        for i in xrange(shape(filters)[0]):
 			#mus[i]		  = (sigma/(lambda_[i]))/(delta_w)
 			#sigmas[i]	  = sigma*(1./(2*lambda_[i]**2))/delta_w
 			#support    	  = [int(floor((mus[i]-sigmas[i]))),int(min(ceil((mus[i]+sigmas[i])),N/2))]
                         #filters[i,:]     /= norm(filters[i,:])
-			plot(filters[i,:])
+#			plot(filters[i,:])
 			#axvline(mus[i],color='r')
 			#axvline(int(floor((mus[i]-sigmas[i]))),color='k')
                         #axvline(int(min(ceil((mus[i]+sigmas[i])),N/2)),color='k')	
 			#coeffs 		  = filters[i,support[0]:support[1]]
 	                #filters_sparse[i] = sparse_filter(coeffs,support,mus[i])
-		show()
+#		show()
 	elif wavelet_name == 'Gammatone':
         	alpha = wavelet_params[1]
         	m     = wavelet_params[0]
@@ -63,15 +63,15 @@ def create_filters(N,J,Q,eps=0.001,wavelet_name='Morlet',wavelet_params=60):
                 filters_sparse          = [None]*J*Q                
 		mus                     = zeros_like(lambda_)
                 sigmas                  = zeros_like(lambda_)
-        	for i in xrange(shape(filters)[0]):
+ #       	for i in xrange(shape(filters)[0]):
                         #mus[i]            = (1./lambda_[i])*xi/(delta_w)
                         #sigmas[i]         = sigma*(B)/(delta_w*lambda_[i])
                         #support           = [int(floor((mus[i]-sigmas[i]))),int(min(ceil((mus[i]+sigmas[i])),N/2))]
                         #filters[i,:] /= norm(filters[i,:])
-                        plot(filters[i,:])
+  #                      plot(filters[i,:])
                         #coeffs            = filters[i,support[0]:support[1]]
                         #filters_sparse[i] = sparse_filter(coeffs,support,mus[i])
-		show()
+#		show()
 
 	elif wavelet_name ==  'Paul':
 		m                 = wavelet_params
@@ -85,19 +85,19 @@ def create_filters(N,J,Q,eps=0.001,wavelet_name='Morlet',wavelet_params=60):
                 filters_sparse          = [None]*J*Q
                 mus                     = zeros_like(lambda_)
                 sigmas                  = zeros_like(lambda_)
-                for i in xrange(shape(filters)[0]):
+ #               for i in xrange(shape(filters)[0]):
                         #mus[i]            = (2*m+1)/(2*lambda_[i]*delta_w)
                 	#sigmas[i]         = sqrt(2*m+1)/(2*lambda_[i]*delta_w)
                         #support           = [int(floor((mus[i]-sigmas[i]))),int(min(ceil((mus[i]+sigmas[i])),N/2))]
                         #filters[i,:] /= norm(filters[i,:])
-			plot(filters[i,:])
+#			plot(filters[i,:])
                         #coeffs            = filters[i,support[0]:support[1]]
                         #plot(filters[i,:])
                         #axvline(mus[i],color='r')
                         #axvline(int(floor((mus[i]-sigmas[i]))),color='k')
                         #axvline(int(min(ceil((mus[i]+sigmas[i])),N/2)),color='k')      
                         #filters_sparse[i] = sparse_filter(coeffs,support,mus[i])
-		show()
+#		show()
         return filters#,filters_sparse
 
 
