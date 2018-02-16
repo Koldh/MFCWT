@@ -139,7 +139,7 @@ def scattering_3d(x,family_names,filter_bank1,filter_bank2):
 		_,s2,L1 = get_scatt(L3,len(x))
 		L4.append(L1)
 	        S2.append(s2)
-	return S1,S2,L2,L4
+	return asarray(S1),asarray(S2),asarray(L2),asarray(L4)
 	
 	
 
